@@ -28,6 +28,7 @@ static const test_function test_functions[] =
       LTC_TEST_FN(pkcs_1_oaep),
       LTC_TEST_FN(pkcs_1_emsa),
       LTC_TEST_FN(pkcs_1_eme),
+      LTC_TEST_FN(pkcs_1_digestinfo),
       LTC_TEST_FN(rsa),
       LTC_TEST_FN(dh),
       LTC_TEST_FN(ecc),

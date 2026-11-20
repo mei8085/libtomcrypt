@@ -24,6 +24,7 @@ int pkcs_1_pss_test(void);
 int pkcs_1_oaep_test(void);
 int pkcs_1_emsa_test(void);
 int pkcs_1_eme_test(void);
+int pkcs_1_digestinfo_test(void);
 int store_test(void);
 int rotate_test(void);
 int rsa_test(void);
