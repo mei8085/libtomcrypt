@@ -23,6 +23,7 @@ static const test_function test_functions[] =
       LTC_TEST_FN(mac),
       LTC_TEST_FN(modes),
       LTC_TEST_FN(der),
+      LTC_TEST_FN(der_diff),
       LTC_TEST_FN(pkcs_1),
       LTC_TEST_FN(pkcs_1_pss),
       LTC_TEST_FN(pkcs_1_oaep),
