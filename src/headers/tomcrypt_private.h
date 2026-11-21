@@ -644,6 +644,7 @@ int dh_import_pkcs8_asn1(ltc_asn1_list *alg_id, ltc_asn1_list *priv_key, dh_key 
 /* ---- ECC Routines ---- */
 #ifdef LTC_MECC
 int ecc_set_curve_from_mpis(void *a, void *b, void *prime, void *order, void *gx, void *gy, unsigned long cofactor, ecc_key *key);
+int ecc_read_curve_coef(void *coef, const unsigned char *in, unsigned long inlen, void *prime);
 int ecc_copy_curve(const ecc_key *srckey, ecc_key *key);
 int ecc_set_curve_by_size(int size, ecc_key *key);
 int ecc_get_curve_names(const char *oid, const char * const **names);

@@ -80,10 +80,21 @@ int ecc_import_pkcs8_asn1(ltc_asn1_list *alg_id, ltc_asn1_list *priv_key, ecc_ke
           LTC_ASN1_IS_TYPE(point->child->next, LTC_ASN1_OCTET_STRING)) {
 
          ltc_asn1_list *prime = field->child->next;
-         if ((err = ltc_mp_read_unsigned_bin(a, point->child->data, point->child->size)) != CRYPT_OK) {
+         ltc_asn1_list *coef_a = point->child, *coef_b = point->child->next;
+         /* only prime fields are supported, reject characteristic-2 fields */
+         len = sizeof(OID);
+         if ((err = pk_oid_num_to_str(field->child->data, field->child->size, OID, &len)) != CRYPT_OK) {
             goto LBL_DONE;
          }
-         if ((err = ltc_mp_read_unsigned_bin(b, point->child->next->data, point->child->next->size)) != CRYPT_OK) {
+         if (XSTRCMP(OID, "1.2.840.10045.1.1") != 0) {
+            err = CRYPT_INVALID_PACKET;
+            goto LBL_DONE;
+         }
+         /* create bignums, the coefficients have to be canonically encoded field elements */
+         if ((err = ecc_read_curve_coef(a, coef_a->data, coef_a->size, prime->data)) != CRYPT_OK) {
+            goto LBL_DONE;
+         }
+         if ((err = ecc_read_curve_coef(b, coef_b->data, coef_b->size, prime->data)) != CRYPT_OK) {
             goto LBL_DONE;
          }
          if ((err = ltc_ecc_import_point(point_g->data, point_g->size, prime->data, a, b, gx, gy)) != CRYPT_OK) {

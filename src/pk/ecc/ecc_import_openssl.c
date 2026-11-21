@@ -57,6 +57,7 @@ int ecc_import_with_curve(const unsigned char *in, unsigned long inlen, int type
    unsigned char bin_g[2*ECC_MAXSIZE+1], bin_xy[2*ECC_MAXSIZE+2], bin_seed[128];
    unsigned long len_a, len_b, len_k, len_g, len_xy, len;
    unsigned long cofactor = 0, ecver = 0, pkver = 0, tmpoid[16];
+   char fieldoid[256];
    int err;
 
    if ((err = ltc_mp_init_multi(&prime, &order, &a, &b, &gx, &gy, LTC_NULL)) != CRYPT_OK) {
@@ -99,12 +100,18 @@ int ecc_import_with_curve(const unsigned char *in, unsigned long inlen, int type
       err = CRYPT_PK_INVALID_TYPE;
    }
    if (err == CRYPT_OK) {
+      /* the ECParameters version has to be 1 */
+      if (ecver != 1) { err = CRYPT_INVALID_PACKET; goto error; }
+      /* only prime fields are supported, reject characteristic-2 fields */
+      len = sizeof(fieldoid);
+      if ((err = pk_oid_num_to_str(tmpoid, seq_fieldid[0].size, fieldoid, &len)) != CRYPT_OK) { goto error; }
+      if (XSTRCMP(fieldoid, "1.2.840.10045.1.1") != 0) { err = CRYPT_INVALID_PACKET; goto error; }
       len_a  = seq_curve[0].size;
       len_b  = seq_curve[1].size;
       len_g  = seq_ecparams[3].size;
-      /* create bignums */
-      if ((err = ltc_mp_read_unsigned_bin(a, bin_a, len_a)) != CRYPT_OK)                           { goto error; }
-      if ((err = ltc_mp_read_unsigned_bin(b, bin_b, len_b)) != CRYPT_OK)                           { goto error; }
+      /* create bignums, the coefficients have to be canonically encoded field elements */
+      if ((err = ecc_read_curve_coef(a, bin_a, len_a, prime)) != CRYPT_OK)                      { goto error; }
+      if ((err = ecc_read_curve_coef(b, bin_b, len_b, prime)) != CRYPT_OK)                      { goto error; }
       if ((err = ltc_ecc_import_point(bin_g, len_g, prime, a, b, gx, gy)) != CRYPT_OK)         { goto error; }
       /* load curve parameters */
       if ((err = ecc_set_curve_from_mpis(a, b, prime, order, gx, gy, cofactor, key)) != CRYPT_OK) { goto error; }
